@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dumbkv
+spec:
+  template:
+    spec:
+      containers:
+        - name: dumbkv
+          env:
+            - name: DATABASE_LOCATION
+              value: dumbkv.db
+          volumeMounts:
+            - name: dumbkv-pvc
+              mountPath: /data/dumbkvstore
+      volumes:
+        - name: dumbkv-pvc
+          persistentVolumeClaim:
+            claimName: dumbkv-pvc
