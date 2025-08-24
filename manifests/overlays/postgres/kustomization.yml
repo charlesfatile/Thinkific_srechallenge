@@ -1,0 +1,7 @@
+resources:
+  - ../../base
+  - secret.yml
+  - deployment-statefulset.yml
+
+patchesStrategicMerge:
+  - patch-deployment-postgres.yml

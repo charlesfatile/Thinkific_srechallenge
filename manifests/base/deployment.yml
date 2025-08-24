@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dumbkv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dumbkv
+  template:
+    metadata:
+      labels:
+        app: dumbkv
+    spec:
+      containers:
+        - name: dumbkv
+          image: ghcr.io/babfat2010/thinkific_srechallenge:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_LOCATION
+              value: dumbkv.db # default, overridden in overlays
+            - name: DATABASE_TYPE
+              value: sqlite
+          volumeMounts:
+            - name: dumbkv-pvc
+              mountPath: /data/dumbkvstore
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 20
+      volumes:
+        - name: dumbkv-pvc
+          persistentVolumeClaim:
+            claimName: dumbkv-pvc
