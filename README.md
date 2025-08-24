@@ -1,113 +1,100 @@
-# Site Reliability Engineer Challenge
 
-Welcome to the Site Reliability Engineer Challenge. Your task is to follow the Steps to Complete section below based on the code in this repository.
+## Application Overview
 
-You should fork or clone this repository and publish to your own github account. This should be public if completing the github actions steps (you can make it private or remove after we have reviewed), or create a deploy key so we can clone the code if it is private.
+This comprehensive guide provides step-by-step instructions to complete the Thinkific SRE Challenge for the DumbKV application. Follow these steps sequentially to demonstrate enterprise-grade SRE practices.
 
-If you are concerned that your current github account is linked to any current employment and you do not want this activity linked, then create a new github account.
+---
 
-If you do not have a github account, you can still complete this with GitLab, Codeberg, a self hosted Gitea instance or others, however do be aware that Thinkific uses Github and you should be familar with it.
+## Prerequisites
 
-You will supply to us after you are finished:
-- The repository URL
-- A deploykey if the repository is private
+- GitHub account
+- Access to GitHub Codespaces or local development environment
+- Basic understanding of Docker, Kubernetes, and CI/CD concepts
 
-The idea is that we should be able to see: commit history; Github actions runs; the contents of the repository.
+---
 
-Notes:
-- You are not expected to understand python, bugs in the application are not what you are trying to solve here.
-- You don't have to complete everything, if you can't, at least leaving enough notes of next steps in a markdown document are helpful.
-- Don't worry! Just try it!
-- Nobody is perfect, if you have made mistakes and they show up in the commit history this looks better than a clean slate (but it is optional, feel free to fix your commit history if you like)
-- If you run out of github actions credits for running workflows don't feel the need to pay, just make a note or leave comments on how you would implement if you cannot test the changes.
+## Containerizing the Application
 
-Things that aren't required but will be favourable:
-- Commit history (small, frequent commits are better than large commits)
-- Signed commits
-- Pushed image to GHCR with a github actions build pipeline
-- Build attestations for the docker image
+- [**Dockerfile**](./Dockerfile) for containerizing the application
+- In order to do the local testing, go through [Running container](#local-testing)
 
-# DumbKV
+## CI/CD 
+[![Docker Build & Push](https://github.com/babfat2010/Thinkific_srechallenge/actions/workflows/build.yaml/badge.svg)](https://github.com/babfat2010/Thinkific_srechallenge/actions/workflows/build.yaml)
 
-This is a KV server that you shouldn't use. It's only purpose is to create something that can be run. It doesn't store things well and doesn't do a lot of checks so it's very easy to DoS this. 
+[![Tests with Postgres](https://github.com/babfat2010/Thinkific_srechallenge/actions/workflows/tests-postgres.yml/badge.svg)](https://github.com/babfat2010/Thinkific_srechallenge/actions/workflows/tests-postgres.yml)
 
-Keys are sha265 hashed, so you if you forget your key you will have to guess what it is again. The values are encrypted with the hashed key values.
+[![Unit Tests](https://github.com/babfat2010/Thinkific_srechallenge/actions/workflows/unit-test.yml/badge.svg)](https://github.com/babfat2010/Thinkific_srechallenge/actions/workflows/unit-test.yml)
 
-# Running
+Below are the worklows created
 
-Install uv by following https://docs.astral.sh/uv/getting-started/installation/
+1- **Docker build & Bush**
 
-Install python 3.12
+- Workflow helps in building the docker file on `feature branch`
+- Workflows helps in testing the dockerfile getting build successfully on every PR to `main branch`
+- Whil the any PR merged to `main branch`, workflow will push the image to GHRC - [Container-Registry](https://github.com/babfat2010/Thinkific_srechallenge/pkgs/container/thinkific_srechallenge)
+
+2- **Tests with Postgres**
+
+- Workflow check the application unit test case w.r.t postgres as a backend
+- On every PR this workflow will be triggered
+
+3- **Unit Test**
+
+- Workflow check the application unit test case w.r.t sqlite in-memory db as a backend
+- On every PR this workflow will be triggered
+
+## K8s deployment
+
+The application is completely containerized can be easily deployed to the k8s cluster.
+> **For more informtion go through** - [K8s-deployment-doc](./manifests/README.md)
+
+## Service Level Objectives
+
+SLOs are defined under - [SLOs documentation](./SLOs.md)
+
+## Validation Checklist
+
+Before submitting, ensure:
+
+- [x] Dockerfile builds successfully
+- [x] GitHub Actions workflows pass
+- [x] All Kubernetes manifests are valid YAML
+- [x] Documentation is comprehensive and clear
+- [x] SLOs are realistic and measurable
+- [x] Security best practices are implemented
+- [x] Health checks are properly configured
+- [x] Monitoring is integrated
+
+## Testing Your Solution
+
+### Local Testing
+1. Build Docker image: `docker build -t dumbkv:latest .`
+2. Run container: `docker run -p 8000:8000 dumbkv:latest`
+3. Test health endpoint: `curl http://localhost:8000/health`
+4. Test metrics endpoint: `curl http://localhost:8000/metrics`
+
+### GitHub Actions Testing
+1. Push changes to trigger workflows
+2. Verify build workflow completes successfully
+3. Verify test workflow passes for both SQLite and PostgreSQL
+4. Check that Docker image is built without errors
+
+## Troubleshooting
+
+### Common Issues
+1. **Docker build fails**: Check UV installation and Python version
+2. **Tests fail**: Ensure PostgreSQL service is running for integration tests
+3. **Kubernetes deployment fails**: Verify storage class and ingress controller
+4. **Metrics not scraped**: Confirm ServiceMonitor and Prometheus Operator
+
+### Debug Commands
+```bash
+# Docker debugging
+docker logs <container-id>
+docker exec -it <container-id> /bin/bash
+
+# Kubernetes debugging
+kubectl describe pod <pod-name> -n dumbkv
+kubectl logs <pod-name> -n dumbkv
+kubectl get events -n dumbkv
 ```
-uv python install 3.12
-```
-
-Install dependencies:
-```
-uv sync
-```
-
-Create an `.env` file. by default using the sqlite storage:
-```
-DATABASE_LOCATION=dumbkv.db
-DATABASE_TYPE=sqlite
-```
-
-Start server:
-```
-uv run uvicorn main:api --host 0.0.0.0 --port 8000 --log-config logging.yaml
-```
-
-Then load the basic UI at http://127.0.0.1:8000/ or open the swagger docs at http://127.0.0.1:8000/docs
-
-# Postgres storage
-
-To use the optional postgres storage, start a new postgres instance:
-```
-docker run -it --rm -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres
-```
-
-Then in your `.env` file set:
-```
-DATABASE_LOCATION=postgres://postgres:postgres@localhost/postgres
-DATABASE_TYPE=postgres
-```
-
-# Running tests
-
-Run pytest with:
-```
-uv run python -m pytest
-```
-
-By default this will use the an in memory sqlite backend. To test with postgres start pytest with the `--database-location` argument:
-```
-uv run python -m pytest -v --database-location=postgres://postgres:postgres@127.0.0.1/postgres
-```
-
-
-# Steps to complete
-
-Feel free to check these boxes in your copy along the way. If you want to leave short notes about your changes you can add them to this list also.
-
-## Build
-- [ ] Finish the dockerfile to run this project
-- [ ] Finish the github action to build the docker image (no need to push anywhere if you don't want to)
-
-## Test
-- [ ] Create a github actions workflow that runs the tests on each pull_request
-- [ ] Create an additional test workflow that runs a postgres service and update the test config to use this postgres backend
-
-## Create the kubernetes manifests to run this service
-
-The manifests can be saved in a `manifests` directory.
-
-- [ ] Create a deployment, including a health check, using the sqlite backend. We only need 1 replica, and we should prevent multiple instances from running
-- [ ] Create a service
-- [ ] Create a PVC and ensure the database directory is named `dumbkvstore`. The storage class name is `efs`
-- [ ] Create an ingress or gateway for the hostname `dumbkv.example.com`, the service will be available on the root path, the cert-manager cluster issuer is named `letsencrypt`
-- [ ] Update the kubernetes manifests to support the postgres backend
-
-## Monitoring
-- [ ] Create a service monitor objects for prometheus to scrape the metrics
-- [ ] Create a markdown document describing what SLO you would set for this application
