@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: dumbkv-servicemonitor
+  namespace: monitoring
+  labels:
+    release: prometheus   # must match your Prometheus Operator selector
+spec:
+  selector:
+    matchLabels:
+      app: dumbkv
+  namespaceSelector:
+    matchNames:
+      - default   # change if your app runs in another namespace
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s

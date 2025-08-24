@@ -80,5 +80,16 @@ kubectl describe svc dumbkv
 ```bash
 kubectl port-forward svc/dumbkv 8000:80
 ```
+### Monitoring
+
+> **DumbKV app already exposes metrics on /metrics**
+
+This ensures Prometheus scrapes the DumbKV app’s `/metrics` endpoint every 15s.
+
+1. Requirements
+    * Prometheus Operator must be installed in the cluster.
+    * The `Service` for DumbKV must expose a port named `http` on `8000`.
+    * Prometheus must have a `release=prometheus` label selector to match this ServiceMonitor.
+
 
 
