@@ -1,0 +1,56 @@
+name: Tests with Postgres
+
+on:
+  pull_request:
+
+jobs:
+  tests-postgres:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U testuser -d testdb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_LOCATION: postgres://testuser:testpass@localhost:5432/testdb
+      DATABASE_TYPE=postgres
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..10}; do
+            if pg_isready -h localhost -U testuser -d testdb; then
+              echo "Postgres is ready!"
+              break
+            fi
+            echo "Waiting for Postgres..."
+            sleep 5
+          done
+
+      - name: Run tests with Postgres backend
+        run: PYTHONPATH=. uv run pytest -v
