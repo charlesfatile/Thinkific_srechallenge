@@ -53,4 +53,4 @@ jobs:
           done
 
       - name: Run tests with Postgres backend
-        run: PYTHONPATH=. uv run pytest -v
+        run: PYTHONPATH=. uv run pytest -v --database-location=${DATABASE_LOCATION}
