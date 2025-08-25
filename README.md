@@ -31,7 +31,7 @@ Below are the worklows created
 
 - Workflow helps in building the docker file on `feature branch`
 - Workflows helps in testing the dockerfile getting build successfully on every PR to `main branch`
-- Whil the any PR merged to `main branch`, workflow will push the image to GHRC - [Container-Registry](https://github.com/babfat2010/Thinkific_srechallenge/pkgs/container/thinkific_srechallenge)
+- Whenever any PR merged to `main branch`, workflow will push the image to GHRC - [Container-Registry](https://github.com/babfat2010/Thinkific_srechallenge/pkgs/container/thinkific_srechallenge)
 
 2- **Tests with Postgres**
 
