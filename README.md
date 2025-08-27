@@ -1,11 +1,11 @@
 
 ## Application Overview
 
-This comprehensive guide provides step-by-step instructions to complete the Thinkific SRE Challenge for the DumbKV application. Follow these steps sequentially to demonstrate enterprise-grade SRE practices.
+This comprehensive guide provides step-by-step instructions to complete the Thinkific SRE Challenge for the DumbKV application. These steps were followed sequentially to demonstrate enterprise-grade SRE practices.
 
 ---
 
-## Prerequisites
+## Prerequisites/Assumption
 
 - GitHub account
 - Access to GitHub Codespaces or local development environment
@@ -54,7 +54,7 @@ SLOs are defined under - [SLOs documentation](./SLOs.md)
 
 ## Validation Checklist
 
-Before submitting, ensure:
+Check list:
 
 - [x] Dockerfile builds successfully
 - [x] GitHub Actions workflows pass
