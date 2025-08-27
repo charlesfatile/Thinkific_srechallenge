@@ -25,7 +25,7 @@ This comprehensive guide provides step-by-step instructions to complete the Thin
 
 [![Unit Tests](https://github.com/babfat2010/Thinkific_srechallenge/actions/workflows/unit-test.yml/badge.svg)](https://github.com/babfat2010/Thinkific_srechallenge/actions/workflows/unit-test.yml)
 
-Below are the worklows created
+Below are the worklows that were created
 
 1- **Docker build & Bush**
 
