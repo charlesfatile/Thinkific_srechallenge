@@ -97,4 +97,8 @@ docker exec -it <container-id> /bin/bash
 kubectl describe pod <pod-name> -n dumbkv
 kubectl logs <pod-name> -n dumbkv
 kubectl get events -n dumbkv
+### Things that could be added to make the workflow production ready, but are not part of assignment requirements
+1. **Tags based on git tags or releases could be included. E.g versioned tags
+2. **Build caching can be included
+
 ```
