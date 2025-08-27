@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - 'feature/*'
+    tags:
+      - 'v*'   # e.g. v1.0.0
   pull_request:
     branches:
       - main
@@ -13,7 +15,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
 env:
-  REGISTRY: ghcr.io # Only used for labeling, if you want to push it make sure you have permissions to push.
+  REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
@@ -45,11 +47,11 @@ jobs:
     name: Push Docker image
     runs-on: ubuntu-latest
     needs: build-image
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
 
     permissions:
       contents: read
-      packages: write   # needed for pushing to GHCR
+      packages: write
 
     steps:
       - name: Checkout
@@ -68,11 +70,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set Docker tags
+        id: vars
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION_TAG="${GITHUB_REF#refs/tags/}"
+            echo "TAGS=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:${VERSION_TAG}" >> $GITHUB_ENV
+          elif [[ "${GITHUB_REF}" == refs/heads/main ]]; then
+            echo "TAGS=${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:${GITHUB_SHA}" >> $GITHUB_ENV
+          fi
+
       - name: Build and Push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:${{ github.sha }}
+          tags: ${{ env.TAGS }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
